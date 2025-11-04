@@ -1,0 +1,17 @@
+{
+  "name": "kira-psycho-backend",
+  "version": "1.0.0",
+  "description": "Kira Psycho Clinics Backend API",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3"
+  }
+}
