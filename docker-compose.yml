@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  kira_db:
+    image: postgres:15
+    container_name: kira_psycho_db
+    environment:
+      POSTGRES_DB: kira_psycho_clinics
+      POSTGRES_USER: kira_user
+      POSTGRES_PASSWORD: kira_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - kira_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kira_user -d kira_psycho_clinics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kira_backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: kira_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://kira_user:kira_pass@kira_db:5432/kira_psycho_clinics
+      - JWT_SECRET=kira-psycho-clinics-super-secret-jwt-key-2024
+      - NODE_ENV=development
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      kira_db:
+        condition: service_healthy
+    command: npm run dev
+
+  kira_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: kira_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - kira_backend
+
+volumes:
+  kira_postgres_data:
