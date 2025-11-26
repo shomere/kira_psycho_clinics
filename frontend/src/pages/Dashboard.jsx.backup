@@ -1,0 +1,29 @@
+import './Dashboard.css'
+
+
+function Dashboard() {
+  return (
+    <div className="page-container">
+      <div className="page-header">
+        <h1>Dashboard</h1>
+        <p>Welcome to your Kira Psycho Clinics dashboard</p>
+      </div>
+      
+      <div className="dashboard-grid">
+        <div className="dashboard-card">
+          <h3>Upcoming Appointments</h3>
+          <p>No upcoming appointments</p>
+          <button className="btn-primary">Book Session</button>
+        </div>
+        
+        <div className="dashboard-card">
+          <h3>Your Therapists</h3>
+          <p>You haven't connected with any therapists yet</p>
+          <button className="btn-outline">Find Therapists</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Dashboard

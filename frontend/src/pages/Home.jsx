@@ -1,58 +1,64 @@
 import { Link } from 'react-router-dom'
+import './Home.css'
 
 function Home() {
   return (
-    <>
-      {/* Header */}
-      <header className="app-header">
-        <div className="header-content">
-          <div>
-            <h1>Kira Psycho Clinics</h1>
-            <p>Your Journey to Mental Wellness Starts Here</p>
+    <div className="home-page">
+      {/* Navigation Header */}
+      <nav className="navbar">
+        <div className="nav-container">
+          <div className="nav-logo">
+            <h2>Kira Psycho Clinics</h2>
           </div>
-          <nav className="nav-links">
-            <Link to="/therapists">Find Therapists</Link>
-            <Link to="/about">About</Link>
-            <Link to="/contact">Contact</Link>
-            <div className="auth-buttons">
-              <Link to="/login" className="btn-primary">Login</Link>
-              <Link to="/register" className="btn-outline">Sign Up</Link>
+          <div className="nav-menu">
+            <Link to="/therapists" className="nav-link">Find Therapists</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            <Link to="/contact" className="nav-link">Contact</Link>
+            <div className="nav-auth">
+              <Link to="/login" className="nav-login">Login</Link>
+              <Link to="/register" className="nav-signup">Sign Up</Link>
             </div>
-          </nav>
+          </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-content">
-          <h2>Professional Mental Health Support</h2>
-          <p>Connect with licensed therapists for personalized care from the comfort of your home</p>
-          <div className="hero-buttons">
-            <Link to="/therapists" className="btn-large">Find Your Therapist</Link>
-            <Link to="/register" className="btn-large-outline">Book First Session</Link>
+      <section className="hero-section">
+        <div className="hero-container">
+          <div className="hero-content">
+            <h1>Professional Mental Health Support</h1>
+            <p>Connect with licensed therapists for personalized care from the comfort of your home</p>
+            <div className="hero-buttons">
+              <Link to="/therapists" className="btn btn-primary">Find Your Therapist</Link>
+              <Link to="/register" className="btn btn-secondary">Book First Session</Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="features">
+      <section className="features-section">
         <div className="container">
-          <h3>Why Choose Kira Psycho Clinics?</h3>
+          <h2>Why Choose Kira Psycho Clinics?</h2>
           <div className="features-grid">
-            <div className="feature-card">
-              <h4> 50+ Licensed Therapists</h4>
+            <div className="feature-item">
+              <div className="feature-icon">👥</div>
+              <h3>50+ Licensed Therapists</h3>
               <p>Verified professionals specializing in various mental health areas</p>
             </div>
-            <div className="feature-card">
-              <h4> Online Sessions</h4>
+            <div className="feature-item">
+              <div className="feature-icon">💻</div>
+              <h3>Online Sessions</h3>
               <p>Secure video calls from anywhere, anytime</p>
             </div>
-            <div className="feature-card">
-              <h4> Complete Privacy</h4>
+            <div className="feature-item">
+              <div className="feature-icon">🔒</div>
+              <h3>Complete Privacy</h3>
               <p>Your sessions and data are encrypted and confidential</p>
             </div>
-            <div className="feature-card">
-              <h4> Flexible Scheduling</h4>
+            <div className="feature-item">
+              <div className="feature-icon">⏰</div>
+              <h3>Flexible Scheduling</h3>
               <p>Book appointments that fit your schedule</p>
             </div>
           </div>
@@ -60,12 +66,12 @@ function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="app-footer">
+      <footer className="footer">
         <div className="container">
-          <p>&copy; 2024 Kira Psycho Clinics. All rights reserved.</p>
+          <p>&copy; 2025 Kira Psycho Clinics. All rights reserved.</p>
         </div>
       </footer>
-    </>
+    </div>
   )
 }
 
