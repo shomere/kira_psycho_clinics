@@ -2,24 +2,24 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
-import { useVideo } from '../context/VideoContext'; // ← Add VideoContext
+import { useVideo } from '../context/VideoContext';
 import api from '../services/api';
 import ChatInterface from '../components/chat/ChatInterface';
 import ChatList from '../components/chat/ChatList';
-import VideoCallInterface from '../components/video/VideoCallInterface'; // ← Add VideoCallInterface
+import VideoCallInterface from '../components/video/VideoCallInterface';
 import './Dashboard.css';
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const { currentUser, logout } = useAuth();
   const { activeChat, setActiveChat, allChats } = useChat();
-  const { currentCall, joinVideoCall, leaveVideoCall, isJoining } = useVideo(); // ← Add video hooks
+  const { currentCall, joinVideoCall, leaveVideoCall, isJoining } = useVideo();
   
   // Add video state
   const [selectedChat, setSelectedChat] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showChat, setShowChat] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false); // ← Add video modal state
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   // State for real data
@@ -31,35 +31,33 @@ function Dashboard() {
   // Mock data fallback
   const mockUpcomingAppointments = [
     {
-      id: 1,
+      appointment_id: 1,
       therapist: 'Dr. Sarah Johnson',
-      therapistId: 2,
-      date: '2024-03-15',
-      time: '14:00',
-      duration: '60 min',
-      type: 'Video Session',
+      therapist_id: 2,
+      scheduled_time: '2024-03-15T14:00:00Z',
+      duration_minutes: 60,
+      session_type: 'Video Session',
       status: 'confirmed',
-      roomUrl: 'https://kira-psycho-clinics.daily.co/session-123' // Demo room URL
+      room_url: 'https://kira-psycho-clinics.daily.co/session-123'
     },
     {
-      id: 2,
+      appointment_id: 2,
       therapist: 'Dr. Michael Chen',
-      therapistId: 3,
-      date: '2024-03-20',
-      time: '10:30',
-      duration: '45 min',
-      type: 'In-Person',
+      therapist_id: 3,
+      scheduled_time: '2024-03-20T10:30:00Z',
+      duration_minutes: 45,
+      session_type: 'In-Person',
       status: 'confirmed'
     }
   ];
 
   const mockAppointmentHistory = [
     {
-      id: 1,
+      appointment_id: 3,
       therapist: 'Dr. Emily Rodriguez',
-      date: '2024-02-10',
-      duration: '60 min',
-      type: 'Video Session',
+      scheduled_time: '2024-02-10T09:00:00Z',
+      duration_minutes: 60,
+      session_type: 'Video Session',
       status: 'completed'
     }
   ];
@@ -74,29 +72,106 @@ function Dashboard() {
     }
   ];
 
+  // Helper function to handle API errors
+  const handleApiError = (error) => {
+    console.error('API Error:', error);
+    
+    if (error.message.includes('401') || error.message.includes('Authentication')) {
+      // Token expired, redirect to login
+      logout();
+      return true;
+    }
+    
+    setError('Unable to load appointments. Showing demo data.');
+    return false;
+  };
+
+  // Format appointment data for display
+  const formatAppointmentForDisplay = (appointment) => {
+    const date = new Date(appointment.scheduled_time || appointment.date);
+    const formattedDate = date.toLocaleDateString();
+    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    return {
+      id: appointment.appointment_id || appointment.id,
+      therapist: appointment.therapist || appointment.therapist_name || 'Unknown Therapist',
+      therapistId: appointment.therapist_id || appointment.therapistId,
+      date: formattedDate,
+      time: formattedTime,
+      duration: `${appointment.duration_minutes || appointment.duration} min`,
+      type: appointment.session_type || appointment.type || 'Session',
+      status: appointment.status || 'scheduled',
+      roomUrl: appointment.room_url || appointment.roomUrl
+    };
+  };
+
   // Fetch user appointments from API
   useEffect(() => {
     const fetchUserAppointments = async () => {
-      if (!currentUser) return;
+      console.log('Fetching appointments for user:', currentUser);
+      console.log('API URL:', import.meta.env.VITE_API_URL);
+      
+      if (!currentUser || !currentUser.user_id) {
+        console.warn('No user data found, using mock data');
+        setError('User not authenticated. Showing demo data.');
+        setUpcomingAppointments(mockUpcomingAppointments);
+        setAppointmentHistory(mockAppointmentHistory);
+        setLoading(false);
+        return;
+      }
       
       setLoading(true);
       setError('');
 
       try {
-        const response = await api.getUserAppointments();
-        const appointments = response.appointments || response.data || response || [];
+        // Get token for debugging
+        const token = localStorage.getItem('token');
+        console.log('Token exists:', !!token);
+        
+        // FIX: Pass user ID to the API call
+        const response = await api.getUserAppointments(currentUser.user_id);
+        console.log('API Response:', response);
+        
+        // Handle different response structures
+        let appointments = [];
+        if (response && response.appointments) {
+          appointments = response.appointments;
+        } else if (Array.isArray(response)) {
+          appointments = response;
+        } else if (response && response.data) {
+          appointments = response.data;
+        }
+        
+        console.log('Processed appointments:', appointments);
         
         const now = new Date();
-        const upcoming = appointments.filter(apt => new Date(apt.date) >= now);
-        const history = appointments.filter(apt => new Date(apt.date) < now);
+        const upcoming = appointments
+          .filter(apt => {
+            const appointmentDate = new Date(apt.scheduled_time || apt.date);
+            return appointmentDate >= now && apt.status !== 'cancelled';
+          })
+          .map(formatAppointmentForDisplay);
         
-        setUpcomingAppointments(upcoming.length > 0 ? upcoming : mockUpcomingAppointments);
-        setAppointmentHistory(history.length > 0 ? history : mockAppointmentHistory);
+        const history = appointments
+          .filter(apt => {
+            const appointmentDate = new Date(apt.scheduled_time || apt.date);
+            return appointmentDate < now || apt.status === 'completed';
+          })
+          .map(formatAppointmentForDisplay);
+        
+        console.log('Upcoming appointments:', upcoming);
+        console.log('History appointments:', history);
+        
+        setUpcomingAppointments(upcoming.length > 0 ? upcoming : mockUpcomingAppointments.map(formatAppointmentForDisplay));
+        setAppointmentHistory(history.length > 0 ? history : mockAppointmentHistory.map(formatAppointmentForDisplay));
+        
       } catch (error) {
-        console.log('API not available, using mock data');
-        setError('Unable to load appointments. Showing demo data.');
-        setUpcomingAppointments(mockUpcomingAppointments);
-        setAppointmentHistory(mockAppointmentHistory);
+        console.error('Error fetching appointments:', error);
+        if (!handleApiError(error)) {
+          setError('Unable to load appointments. Showing demo data.');
+          setUpcomingAppointments(mockUpcomingAppointments.map(formatAppointmentForDisplay));
+          setAppointmentHistory(mockAppointmentHistory.map(formatAppointmentForDisplay));
+        }
       } finally {
         setLoading(false);
       }
@@ -139,6 +214,7 @@ function Dashboard() {
         setShowVideoModal(true);
       }
     } catch (error) {
+      console.error('Error joining video session:', error);
       setError('Failed to join video session. Please try again.');
     }
   };
