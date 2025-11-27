@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pkg from 'pg';
 const { Pool } = pkg;
+import { createServer } from 'http'; // ADD THIS
+import { Server } from 'socket.io'; // ADD THIS
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +15,97 @@ const JWT_SECRET = process.env.JWT_SECRET || 'kira-psycho-clinics-super-secret-2
 const pool = new Pool({
   connectionString: 'postgresql://kira_user:kira_pass@localhost:5432/kira_psycho_clinics'
 });
+
+const server = createServer(app); // ADD THIS
+
+// Socket.io configuration - ADD THIS SECTION
+const io = new Server(server, {
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://your-frontend-app.onrender.com'
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+// Socket.io connection handling - ADD THIS SECTION
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // Join room for specific user
+  socket.on('join-user-room', (userId) => {
+    socket.join(`user-${userId}`);
+    console.log(`User ${userId} joined room user-${userId}`);
+  });
+
+  // Join room for specific therapist
+  socket.on('join-therapist-room', (therapistId) => {
+    socket.join(`therapist-${therapistId}`);
+    console.log(`Therapist ${therapistId} joined room therapist-${therapistId}`);
+  });
+
+  // Handle chat messages
+  socket.on('send-message', (data) => {
+    const { to, message, from } = data;
+    // Broadcast to specific user/therapist room
+    socket.to(`user-${to}`).to(`therapist-${to}`).emit('receive-message', {
+      from,
+      message,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Handle video call requests
+  socket.on('video-call-request', (data) => {
+    const { to, from, callType } = data;
+    socket.to(`user-${to}`).to(`therapist-${to}`).emit('incoming-call', {
+      from,
+      callType,
+      callId: Math.random().toString(36).substring(7)
+    });
+  });
+
+  // Handle call acceptance
+  socket.on('call-accepted', (data) => {
+    const { to, callId } = data;
+    socket.to(`user-${to}`).to(`therapist-${to}`).emit('call-established', {
+      callId,
+      established: true
+    });
+  });
+
+  // Handle call rejection
+  socket.on('call-rejected', (data) => {
+    const { to } = data;
+    socket.to(`user-${to}`).to(`therapist-${to}`).emit('call-ended', {
+      reason: 'rejected'
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Database connection
+const pool = new Pool({
+  connectionString: 'postgresql://kira_user:kira_pass@localhost:5432/kira_psycho_clinics'
+});
+
+// Update your CORS configuration
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://your-frontend-app.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
 app.use(cors({
   origin: [
@@ -424,7 +517,8 @@ app.get('/api/specializations', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Change from app.listen to server.listen
+server.listen(PORT, '0.0.0.0', () => {
   console.log('🚀 Kira Psycho Clinics backend running on port ' + PORT);
   console.log('📍 Health: http://localhost:' + PORT + '/api/health');
   console.log('📍 Register: POST http://localhost:' + PORT + '/api/auth/register');
@@ -435,4 +529,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('📍 Appointments: POST http://localhost:' + PORT + '/api/appointments/book (protected)');
   console.log('📍 Availability: GET http://localhost:' + PORT + '/api/availability/:therapistId');
   console.log('📍 JWT Test: GET http://localhost:' + PORT + '/api/test-jwt');
+  console.log('🔌 Socket.io is running on the same port');
 });
