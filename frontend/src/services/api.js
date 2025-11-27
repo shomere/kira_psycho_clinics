@@ -16,8 +16,8 @@ class ApiService {
       ...options,
     };
 
-    // Add auth token if available
-    const token = localStorage.getItem('authToken');
+    // Add auth token if available - FIX: use 'token' instead of 'authToken'
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,8 +25,23 @@ class ApiService {
     try {
       const response = await fetch(url, config);
       
+      if (response.status === 401) {
+        // Token expired, clear storage and redirect
+        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        throw new Error('Authentication failed');
+      }
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Handle empty responses
+      const contentLength = response.headers.get('content-length');
+      if (contentLength === '0') {
+        return null;
       }
       
       return await response.json();
@@ -51,6 +66,10 @@ class ApiService {
     });
   }
 
+  async getCurrentUser() {
+    return this.request('/auth/me');
+  }
+
   // Therapist endpoints
   async getTherapists(filters = {}) {
     const queryParams = new URLSearchParams(filters).toString();
@@ -61,22 +80,46 @@ class ApiService {
     return this.request(`/therapists/${id}`);
   }
 
-  // Appointment endpoints
+  // Appointment endpoints - FIXED: include user ID
   async bookAppointment(appointmentData) {
-    return this.request('/appointments', {
+    return this.request('/appointments/book', { // FIX: endpoint matches backend
       method: 'POST',
       body: JSON.stringify(appointmentData),
     });
   }
 
-  async getUserAppointments() {
-    return this.request('/appointments/user');
+  async getUserAppointments(userId) { // FIX: require user ID parameter
+    if (!userId) {
+      throw new Error('User ID is required to fetch appointments');
+    }
+    return this.request(`/appointments/user/${userId}`);
+  }
+
+  async getTherapistAppointments(therapistId) {
+    return this.request(`/appointments/therapist/${therapistId}`);
   }
 
   async cancelAppointment(id) {
     return this.request(`/appointments/${id}`, {
       method: 'DELETE',
     });
+  }
+
+  // Availability endpoints
+  async getTherapistAvailability(therapistId) {
+    return this.request(`/availability/${therapistId}`);
+  }
+
+  async addAvailabilitySlot(slotData) {
+    return this.request('/availability/slots', {
+      method: 'POST',
+      body: JSON.stringify(slotData),
+    });
+  }
+
+  // Specializations
+  async getSpecializations() {
+    return this.request('/specializations');
   }
 }
 
