@@ -14,7 +14,17 @@ const pool = new Pool({
   connectionString: 'postgresql://kira_user:kira_pass@localhost:5432/kira_psycho_clinics'
 });
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173', // Vite default port
+    'http://localhost:3000', // Alternative frontend port
+    'http://127.0.0.1:5173',
+    'https://your-frontend-app.onrender.com' // Your actual Render frontend URL
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(express.json());
 
 // Middleware to verify JWT token
