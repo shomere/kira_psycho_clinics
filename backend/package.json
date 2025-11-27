@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "Kira Psycho Clinics Backend API",
   "type": "module",
+  "main": "src/server.js",
   "scripts": {
+    "start": "node src/server.js",
     "dev": "node src/server.js",
-    "start": "node src/server.js"
+    "build": "echo 'No build step required for Node.js backend' && exit 0"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -15,5 +17,17 @@
     "pg": "^8.11.3",
     "socket.io": "^4.8.1",
     "stripe": "^20.0.0"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "therapy",
+    "mental-health",
+    "api",
+    "express",
+    "postgresql"
+  ],
+  "author": "Kira Psycho Clinics",
+  "license": "MIT"
 }

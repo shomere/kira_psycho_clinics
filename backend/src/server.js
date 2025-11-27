@@ -4,21 +4,23 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pkg from 'pg';
 const { Pool } = pkg;
-import { createServer } from 'http'; // ADD THIS
-import { Server } from 'socket.io'; // ADD THIS
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'kira-psycho-clinics-super-secret-2024';
 
-// Database connection
+// Database connection - ONLY ONCE!
 const pool = new Pool({
-  connectionString: 'postgresql://kira_user:kira_pass@localhost:5432/kira_psycho_clinics'
+  connectionString: process.env.DATABASE_URL || 'postgresql://kira_user:kira_pass@localhost:5432/kira_psycho_clinics',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-const server = createServer(app); // ADD THIS
+// Create HTTP server for Socket.io
+const server = createServer(app);
 
-// Socket.io configuration - ADD THIS SECTION
+// Socket.io configuration
 const io = new Server(server, {
   cors: {
     origin: [
@@ -31,7 +33,7 @@ const io = new Server(server, {
   }
 });
 
-// Socket.io connection handling - ADD THIS SECTION
+// Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -90,16 +92,12 @@ io.on('connection', (socket) => {
   });
 });
 
-// Database connection
-const pool = new Pool({
-  connectionString: 'postgresql://kira_user:kira_pass@localhost:5432/kira_psycho_clinics'
-});
-
-// Update your CORS configuration
+// CORS configuration - ONLY ONCE!
 app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
+    'http://127.0.0.1:5173',
     'https://your-frontend-app.onrender.com'
   ],
   credentials: true,
@@ -107,17 +105,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-app.use(cors({
-  origin: [
-    'http://localhost:5173', // Vite default port
-    'http://localhost:3000', // Alternative frontend port
-    'http://127.0.0.1:5173',
-    'https://your-frontend-app.onrender.com' // Your actual Render frontend URL
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
 app.use(express.json());
 
 // Middleware to verify JWT token
