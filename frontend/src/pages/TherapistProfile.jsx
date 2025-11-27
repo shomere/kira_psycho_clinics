@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // ← Add useEffect
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import api from '../services/api'; // ← Add API import
 import './TherapistProfile.css';
 
 function TherapistProfile() {
@@ -7,9 +8,11 @@ function TherapistProfile() {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [therapist, setTherapist] = useState(null); // ← Change to state
+  const [loading, setLoading] = useState(true); // ← Add loading state
 
-  // Mock therapist data
-  const therapist = {
+  // Mock therapist data fallback
+  const mockTherapist = {
     id: 1,
     name: 'Dr. Sarah Johnson',
     specialty: 'Anxiety & Depression Specialist',
@@ -50,6 +53,23 @@ function TherapistProfile() {
     ]
   };
 
+  // Fetch therapist data from API
+  useEffect(() => {
+    const fetchTherapist = async () => {
+      try {
+        const response = await api.getTherapist(id);
+        setTherapist(response.therapist || response.data || response);
+      } catch (error) {
+        console.log('API not available, using mock data');
+        setTherapist(mockTherapist);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTherapist();
+  }, [id]);
+
   // Mock available time slots
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'
@@ -61,6 +81,8 @@ function TherapistProfile() {
       alert('Please select both date and time');
       return;
     }
+    
+    if (!therapist) return;
     
     // Navigate to booking confirmation page
     navigate('/booking-confirm', {
@@ -77,6 +99,28 @@ function TherapistProfile() {
   const renderStars = (rating) => {
     return '⭐'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="therapist-profile-page">
+        <div className="container">
+          <div className="loading">Loading therapist profile...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no therapist data
+  if (!therapist) {
+    return (
+      <div className="therapist-profile-page">
+        <div className="container">
+          <div className="error">Therapist not found</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="therapist-profile-page">

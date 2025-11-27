@@ -1,5 +1,6 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -13,17 +14,40 @@ export function AuthProvider({ children }) {
 
   // Check if user is logged in on app start
   useEffect(() => {
+    const token = localStorage.getItem('authToken');
     const user = localStorage.getItem('currentUser');
-    if (user) {
+    
+    if (token && user) {
       setCurrentUser(JSON.parse(user));
     }
     setLoading(false);
   }, []);
 
-  // Mock login function - replace with actual API call
+  // Login function with real API integration + mock fallback
   const login = async (email, password) => {
     try {
-      // Simulate API call
+      // Try real API first
+      const response = await api.login(email, password);
+      
+      if (response.success) {
+        const { user, token } = response.data;
+        setCurrentUser(user);
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        return { success: true, user };
+      } else {
+        return { success: false, error: response.message };
+      }
+    } catch (error) {
+      // Fallback to mock authentication if API is not available
+      console.log('API not available, using mock authentication');
+      return await mockLogin(email, password);
+    }
+  };
+
+  // Mock login for development (your existing code)
+  const mockLogin = async (email, password) => {
+    try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mock user data - in real app, this would come from your backend
@@ -37,16 +61,38 @@ export function AuthProvider({ children }) {
       
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('authToken', 'mock-jwt-token'); // Add mock token for consistency
       return { success: true, user };
     } catch (error) {
       return { success: false, error: 'Invalid email or password' };
     }
   };
 
-  // Mock register function
+  // Register function with real API integration + mock fallback
   const register = async (userData) => {
     try {
-      // Simulate API call
+      // Try real API first
+      const response = await api.register(userData);
+      
+      if (response.success) {
+        const { user, token } = response.data;
+        setCurrentUser(user);
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        return { success: true, user };
+      } else {
+        return { success: false, error: response.message };
+      }
+    } catch (error) {
+      // Fallback to mock registration if API is not available
+      console.log('API not available, using mock registration');
+      return await mockRegister(userData);
+    }
+  };
+
+  // Mock register for development (your existing code)
+  const mockRegister = async (userData) => {
+    try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const user = {
@@ -59,6 +105,7 @@ export function AuthProvider({ children }) {
       
       setCurrentUser(user);
       localStorage.setItem('currentUser', JSON.stringify(user));
+      localStorage.setItem('authToken', 'mock-jwt-token'); // Add mock token for consistency
       return { success: true, user };
     } catch (error) {
       return { success: false, error: 'Registration failed' };
@@ -69,6 +116,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('authToken');
   };
 
   const value = {

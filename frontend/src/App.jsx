@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ChatProvider } from './context/ChatContext'
+import { VideoProvider } from './context/VideoContext' // ← Add VideoProvider import
 import ProtectedRoute from './components/common/ProtectedRoute'
 import './App.css'
 import Home from './pages/Home.jsx'
@@ -13,35 +15,39 @@ import BookingConfirm from './pages/BookingConfirm.jsx'
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="app">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/therapists" element={<Therapists />} />
-            <Route path="/therapist/:id" element={<TherapistProfile />} />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/booking-confirm" 
-              element={
-                <ProtectedRoute>
-                  <BookingConfirm />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </div>
-      </Router>
+      <ChatProvider>
+        <VideoProvider> {/* ← ADD VideoProvider WRAPPER */}
+          <Router>
+            <div className="app">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/therapists" element={<Therapists />} />
+                <Route path="/therapist/:id" element={<TherapistProfile />} />
+                
+                {/* Protected Routes */}
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/booking-confirm" 
+                  element={
+                    <ProtectedRoute>
+                      <BookingConfirm />
+                    </ProtectedRoute>
+                  } 
+                />
+              </Routes>
+            </div>
+          </Router>
+        </VideoProvider> {/* ← CLOSE VideoProvider WRAPPER */}
+      </ChatProvider>
     </AuthProvider>
   )
 }

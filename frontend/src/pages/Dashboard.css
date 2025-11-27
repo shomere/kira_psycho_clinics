@@ -282,6 +282,121 @@
   min-width: 60px;
 }
 
+/* Add to Dashboard.css */
+
+/* Messages Tab Styles */
+.messages-tab {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.chat-layout {
+  display: flex;
+  height: 600px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Messages Preview in Overview */
+.messages-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.message-preview-item:hover {
+  border-color: #667eea;
+  background: #f8f9fa;
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.message-preview-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-preview-content h4 {
+  margin: 0 0 0.3rem 0;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.message-preview-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-unread {
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.no-messages {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.text-muted {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Update appointment actions for message button */
+.appointment-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.appointment-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 /* Journal List */
 .journal-list {
   display: flex;
@@ -324,6 +439,170 @@
 .journal-date {
   color: #999;
   font-size: 0.8rem;
+}
+
+/* Add to Dashboard.css */
+
+/* Video Modal Styles */
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.video-modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.video-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e1e5e9;
+  background: white;
+}
+
+.video-modal-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.video-modal-content {
+  height: 600px;
+  overflow: hidden;
+}
+
+/* Video Join Section */
+.video-join-section {
+  padding: 3rem 2rem;
+  text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.session-info {
+  margin-bottom: 2rem;
+}
+
+.session-info h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.8rem;
+}
+
+.session-info p {
+  margin: 0.5rem 0;
+  opacity: 0.9;
+}
+
+.video-join-options {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.video-tips {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: left;
+  max-width: 400px;
+}
+
+.video-tips h4 {
+  margin: 0 0 1rem 0;
+}
+
+.video-tips ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.video-tips li {
+  padding: 0.3rem 0;
+  opacity: 0.9;
+}
+
+/* Video Badge and Live Indicator */
+.video-badge {
+  background: #667eea;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.live-indicator {
+  color: #e74c3c;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+/* Update appointment items for video */
+.appointment-item .appointment-info {
+  flex: 1;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.appointment-full-item .appointment-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 /* Buttons */
