@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
-    "build": "npm start"
+    "build": "npm Install"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
